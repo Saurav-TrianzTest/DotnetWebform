@@ -1,0 +1,50 @@
+@page "{id:int}"
+@{
+    Layout = "_Layout";
+}
+@model eShopLegacyWebForms.Catalog.DeleteModel
+
+<div class="esh-body-title">Delete</div>
+
+<div class="container">
+    <h3>Are you sure you want to delete this?</h3>
+    <div class="row">
+        <img class="col-md-6 esh-picture" src='~/Pics/@Model.CatalogItem.PictureFileName' />
+        <dl class="col-md-6 dl-horizontal">
+            <dt>Name</dt>
+            <dd>@Model.CatalogItem.Name</dd>
+
+            <dt>Description</dt>
+            <dd>@Model.CatalogItem.Description</dd>
+
+            <dt>Brand</dt>
+            <dd>@Model.CatalogItem.CatalogBrand?.Brand</dd>
+
+            <dt>Type</dt>
+            <dd>@Model.CatalogItem.CatalogType?.Type</dd>
+
+            <dt>Price</dt>
+            <dd><span class="esh-price">@Model.CatalogItem.Price</span></dd>
+
+            <dt>Picture name</dt>
+            <dd>@Model.CatalogItem.PictureFileName</dd>
+
+            <dt>Stock</dt>
+            <dd>@Model.CatalogItem.AvailableStock</dd>
+
+            <dt>Restock</dt>
+            <dd>@Model.CatalogItem.RestockThreshold</dd>
+
+            <dt>Max stock</dt>
+            <dd>@Model.CatalogItem.MaxStockThreshold</dd>
+
+            <dt></dt>
+            <dd class="text-right esh-button-actions">
+                <a asp-page="/Index" class="btn esh-button esh-button-secondary">[ Cancel ]</a>
+                <form method="post">
+                    <button type="submit" class="btn esh-button esh-button-primary">[ Delete ]</button>
+                </form>
+            </dd>
+        </dl>
+    </div>
+</div>

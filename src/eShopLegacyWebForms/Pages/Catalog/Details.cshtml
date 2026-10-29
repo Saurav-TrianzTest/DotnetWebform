@@ -1,0 +1,47 @@
+@page "{id:int}"
+@{
+    Layout = "_Layout";
+}
+@model eShopLegacyWebForms.Catalog.DetailsModel
+
+<div class="esh-body-title">Details</div>
+
+<div class="container">
+    <div class="row">
+        <img class="col-md-6 esh-picture" src='~/Pics/@Model.CatalogItem.PictureFileName' />
+        <dl class="col-md-6 dl-horizontal">
+            <dt>Name</dt>
+            <dd>@Model.CatalogItem.Name</dd>
+
+            <dt>Description</dt>
+            <dd>@Model.CatalogItem.Description</dd>
+
+            <dt>Brand</dt>
+            <dd>@Model.CatalogItem.CatalogBrand?.Brand</dd>
+
+            <dt>Type</dt>
+            <dd>@Model.CatalogItem.CatalogType?.Type</dd>
+
+            <dt>Price</dt>
+            <dd><span class="esh-price">@Model.CatalogItem.Price</span></dd>
+
+            <dt>Picture name</dt>
+            <dd>@Model.CatalogItem.PictureFileName</dd>
+
+            <dt>Stock</dt>
+            <dd>@Model.CatalogItem.AvailableStock</dd>
+
+            <dt>Restock</dt>
+            <dd>@Model.CatalogItem.RestockThreshold</dd>
+
+            <dt>Max stock</dt>
+            <dd>@Model.CatalogItem.MaxStockThreshold</dd>
+        </dl>
+    </div>
+
+    <div class="form-actions no-color esh-link-list">
+        <a asp-page="/Catalog/Edit" asp-route-id="@Model.CatalogItem.Id" class="esh-link-item">Edit</a>
+        |
+        <a asp-page="/Index" class="esh-link-item">Back to list</a>
+    </div>
+</div>

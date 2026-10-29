@@ -1,0 +1,98 @@
+@page
+@{
+    Layout = "_Layout";
+}
+@model eShopLegacyWebForms.Pages.IndexModel
+
+<div class="esh-table">
+    <p class="esh-link-wrapper">
+        <a asp-page="/Catalog/Create" class="btn esh-button esh-button-primary">
+            Create New
+        </a>
+    </p>
+
+    <table class="table">
+        <thead>
+            <tr class="esh-table-header">
+                <th></th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Brand</th>
+                <th>Type</th>
+                <th>Price</th>
+                <th>Picture name</th>
+                <th>Stock</th>
+                <th>Restock</th>
+                <th>Max stock</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.PaginatedItems.Data.Any())
+            {
+                <tr>
+                    <td colspan="10">No data was returned.</td>
+                </tr>
+            }
+            @foreach (var item in Model.PaginatedItems.Data)
+            {
+                <tr>
+                    <td>
+                        <image class="esh-thumbnail" src='/Pics/@item.PictureFileName' />
+                    </td>
+                    <td>
+                        <p>@item.Name</p>
+                    </td>
+                    <td>
+                        <p>@item.Description</p>
+                    </td>
+                    <td>
+                        <p>@item.CatalogBrand?.Brand</p>
+                    </td>
+                    <td>
+                        <p>@item.CatalogType?.Type</p>
+                    </td>
+                    <td>
+                        <p><span class="esh-price">@item.Price</span></p>
+                    </td>
+                    <td>
+                        <p>@item.PictureFileName</p>
+                    </td>
+                    <td>
+                        <p>@item.AvailableStock</p>
+                    </td>
+                    <td>
+                        <p>@item.RestockThreshold</p>
+                    </td>
+                    <td>
+                        <p>@item.MaxStockThreshold</p>
+                    </td>
+                    <td>
+                        <a asp-page="/Catalog/Edit" asp-route-id="@item.Id" class="esh-table-link">Edit</a>
+                        |
+                        <a asp-page="/Catalog/Details" asp-route-id="@item.Id" class="esh-table-link">Details</a>
+                        |
+                        <a asp-page="/Catalog/Delete" asp-route-id="@item.Id" class="esh-table-link">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="esh-pager">
+    <div class="container">
+        <article class="esh-pager-wrapper row">
+            <nav>
+                <a id="PaginationPrevious" href="@Url.Page("./Index", null, new { index = Model.PaginatedItems.ActualPage - 1, size = Model.PaginatedItems.ItemsPerPage })" class="esh-pager-item @(Model.PaginatedItems.ActualPage > 0 ? "esh-pager-item--navigable" : "esh-pager-item--hidden")">
+                    Previous
+                </a>
+
+                <span class="esh-pager-item">Showing @Model.PaginatedItems.ItemsPerPage of @Model.PaginatedItems.TotalItems products - Page @(Model.PaginatedItems.ActualPage + 1) - @Model.PaginatedItems.TotalPages</span>
+
+                <a id="PaginationNext" href="@Url.Page("./Index", null, new { index = Model.PaginatedItems.ActualPage + 1, size = Model.PaginatedItems.ItemsPerPage })" class="esh-pager-item @(Model.PaginatedItems.ActualPage < Model.PaginatedItems.TotalPages - 1 ? "esh-pager-item--navigable" : "esh-pager-item--hidden")">
+                    Next
+                </a>
+            </nav>
+        </article>
+    </div>
+</div>

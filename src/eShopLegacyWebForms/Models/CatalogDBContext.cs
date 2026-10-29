@@ -1,13 +1,13 @@
-﻿using eShopLegacyWebForms.Models.Infrastructure;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using eShopLegacyWebForms.Models.Infrastructure;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Data.Entity;
-using System.Data.Entity.ModelConfiguration;
 
 namespace eShopLegacyWebForms.Models
 {
     public class CatalogDBContext : DbContext
     {
-        public CatalogDBContext() : base("name=CatalogDBContext")
+        public CatalogDBContext(DbContextOptions<CatalogDBContext> options) : base(options)
         {
         }
 
@@ -17,7 +17,7 @@ namespace eShopLegacyWebForms.Models
 
         public DbSet<CatalogType> CatalogTypes { get; set; }
 
-        protected override void OnModelCreating(DbModelBuilder builder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
             ConfigureCatalogType(builder.Entity<CatalogType>());
             ConfigureCatalogBrand(builder.Entity<CatalogBrand>());
@@ -26,7 +26,7 @@ namespace eShopLegacyWebForms.Models
             base.OnModelCreating(builder);
         }
 
-        void ConfigureCatalogType(EntityTypeConfiguration<CatalogType> builder)
+        void ConfigureCatalogType(EntityTypeBuilder<CatalogType> builder)
         {
             builder.ToTable("CatalogType");
 
@@ -40,7 +40,7 @@ namespace eShopLegacyWebForms.Models
                 .HasMaxLength(100);
         }
 
-        void ConfigureCatalogBrand(EntityTypeConfiguration<CatalogBrand> builder)
+        void ConfigureCatalogBrand(EntityTypeBuilder<CatalogBrand> builder)
         {
             builder.ToTable("CatalogBrand");
 
@@ -54,14 +54,14 @@ namespace eShopLegacyWebForms.Models
                 .HasMaxLength(100);
         }
 
-        void ConfigureCatalogItem(EntityTypeConfiguration<CatalogItem> builder)
+        void ConfigureCatalogItem(EntityTypeBuilder<CatalogItem> builder)
         {
             builder.ToTable("Catalog");
 
             builder.HasKey(ci => ci.Id);
 
             builder.Property(ci => ci.Id)
-                .HasDatabaseGeneratedOption(DatabaseGeneratedOption.None)
+                .ValueGeneratedNever()
                 .IsRequired();
 
             builder.Property(ci => ci.Name)
@@ -76,11 +76,11 @@ namespace eShopLegacyWebForms.Models
 
             builder.Ignore(ci => ci.PictureUri);
 
-            builder.HasRequired<CatalogBrand>(ci => ci.CatalogBrand)
+            builder.HasOne<CatalogBrand>(ci => ci.CatalogBrand)
                 .WithMany()
                 .HasForeignKey(ci => ci.CatalogBrandId);
 
-            builder.HasRequired<CatalogType>(ci => ci.CatalogType)
+            builder.HasOne<CatalogType>(ci => ci.CatalogType)
                 .WithMany()
                 .HasForeignKey(ci => ci.CatalogTypeId);
         }

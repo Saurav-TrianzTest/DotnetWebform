@@ -1,0 +1,88 @@
+@page
+@{
+    Layout = "_Layout";
+}
+@model eShopLegacyWebForms.Catalog.CreateModel
+
+<div class="esh-body-title">Create</div>
+
+<div>
+    <div class="form-horizontal">
+        <form method="post">
+            <div class="form-group">
+                <label class="control-label col-md-2">Name</label>
+                <div class="col-md-3">
+                    <input asp-for="CatalogItem.Name" class="form-control" />
+                    <span asp-validation-for="CatalogItem.Name" class="field-validation-valid text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-md-2">Description</label>
+                <div class="col-md-3">
+                    <input asp-for="CatalogItem.Description" class="form-control" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-md-2">Brand</label>
+                <div class="col-md-3">
+                    <select asp-for="CatalogItem.CatalogBrandId" asp-items="Model.Brands" class="form-control"></select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-md-2">Type</label>
+                <div class="col-md-3">
+                    <select asp-for="CatalogItem.CatalogTypeId" asp-items="Model.Types" class="form-control"></select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-md-2">Price</label>
+                <div class="col-md-3">
+                    <input asp-for="CatalogItem.Price" class="form-control" value="0.00" />
+                    <span asp-validation-for="CatalogItem.Price" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-md-2">Picture name</label>
+                <div class="col-md-4 esh-form-information">
+                    Uploading images not allowed for this version.
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-md-2">Stock</label>
+                <div class="col-md-3">
+                    <input asp-for="CatalogItem.AvailableStock" class="form-control" value="0" />
+                    <span asp-validation-for="CatalogItem.AvailableStock" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-md-2">Restock</label>
+                <div class="col-md-3">
+                    <input asp-for="CatalogItem.RestockThreshold" class="form-control" value="0" />
+                    <span asp-validation-for="CatalogItem.RestockThreshold" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-md-2">Max stock</label>
+                <div class="col-md-3">
+                    <input asp-for="CatalogItem.MaxStockThreshold" class="form-control" value="0" />
+                    <span asp-validation-for="CatalogItem.MaxStockThreshold" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-3 text-right esh-button-actions">
+                    <a asp-page="/Index" class="btn esh-button esh-button-secondary">[ Cancel ]</a>
+                    <button type="submit" class="btn esh-button esh-button-primary">[ Create ]</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
