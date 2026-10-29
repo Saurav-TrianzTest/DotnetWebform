@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Amazon.S3;
+using Amazon.S3.Model;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.Entity;
@@ -6,7 +8,9 @@ using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Hosting;
 
@@ -20,13 +24,20 @@ namespace eShopLegacyWebForms.Models.Infrastructure
         private const string CatalogBrandHiLoSequenceScript = @"Models\Infrastructure\dbo.catalog_brand_hilo.Sequence.sql";
         private const string CatalogTypeHiLoSequenceScript = @"Models\Infrastructure\dbo.catalog_type_hilo.Sequence.sql";
 
+        private readonly IAmazonS3 _s3Client;
+        private readonly string _bucketName;
+        private readonly string _keyPrefix;
+
         private CatalogItemHiLoGenerator indexGenerator;
         private bool useCustomizationData;
 
-        public CatalogDBInitializer(CatalogItemHiLoGenerator indexGenerator)
+        public CatalogDBInitializer(CatalogItemHiLoGenerator indexGenerator, IAmazonS3 s3Client = null)
         {
             this.indexGenerator = indexGenerator;
-            useCustomizationData = bool.Parse(ConfigurationManager.AppSettings["UseCustomizationData"]);
+            this._s3Client = s3Client;
+            this._bucketName = ConfigurationManager.AppSettings["AWS:S3:CatalogBucket"] ?? Environment.GetEnvironmentVariable("AWS__S3__CatalogBucket");
+            this._keyPrefix = ConfigurationManager.AppSettings["AWS:S3:DataKeyPrefix"] ?? Environment.GetEnvironmentVariable("AWS__S3__DataKeyPrefix") ?? "catalog/";
+            useCustomizationData = bool.Parse(Environment.GetEnvironmentVariable("UseCustomizationData") ?? ConfigurationManager.AppSettings["UseCustomizationData"] ?? "false");
         }
 
         protected override void Seed(CatalogDBContext context)
@@ -93,10 +104,9 @@ namespace eShopLegacyWebForms.Models.Infrastructure
 
         private IEnumerable<CatalogType> GetCatalogTypesFromFile()
         {
-            var contentRootPath = HostingEnvironment.ApplicationPhysicalPath;
-            string csvFileCatalogTypes = Path.Combine(contentRootPath, "Setup", "CatalogTypes.csv");
+            string csvFileCatalogTypes = "Setup/CatalogTypes.csv";
 
-            if (!File.Exists(csvFileCatalogTypes))
+            if (_s3Client == null || !ObjectExistsAsync(_bucketName, _keyPrefix + csvFileCatalogTypes).Result)
             {
                 return PreconfiguredData.GetPreconfiguredCatalogTypes();
             }
@@ -106,7 +116,7 @@ namespace eShopLegacyWebForms.Models.Infrastructure
             string[] requiredHeaders = { "catalogtype" };
             csvheaders = GetHeaders(csvFileCatalogTypes, requiredHeaders);
 
-            return File.ReadAllLines(csvFileCatalogTypes)
+            return ReadAllLinesFromS3(_bucketName, _keyPrefix + csvFileCatalogTypes)
                                         .Skip(1) // skip header row
                                         .Select(x => CreateCatalogType(x))
                                         .Where(x => x != null);
@@ -127,12 +137,12 @@ namespace eShopLegacyWebForms.Models.Infrastructure
             };
         }
 
-        static IEnumerable<CatalogBrand> GetCatalogBrandsFromFile()
+        private IEnumerable<CatalogBrand> GetCatalogBrandsFromFile()
         {
             var contentRootPath = HostingEnvironment.ApplicationPhysicalPath;
             string csvFileCatalogBrands = Path.Combine(contentRootPath, "Setup", "CatalogBrands.csv");
 
-            if (!File.Exists(csvFileCatalogBrands))
+            if (_s3Client == null || !ObjectExistsAsync(_bucketName, _keyPrefix + csvFileCatalogBrands).Result)
             {
                 return PreconfiguredData.GetPreconfiguredCatalogBrands();
             }
@@ -142,7 +152,7 @@ namespace eShopLegacyWebForms.Models.Infrastructure
             string[] requiredHeaders = { "catalogbrand" };
             csvheaders = GetHeaders(csvFileCatalogBrands, requiredHeaders);
 
-            return File.ReadAllLines(csvFileCatalogBrands)
+            return ReadAllLinesFromS3(_bucketName, _keyPrefix + csvFileCatalogBrands)
                                         .Skip(1) // skip header row
                                         .Select(x => CreateCatalogBrand(x))
                                         .Where(x => x != null);
@@ -163,12 +173,11 @@ namespace eShopLegacyWebForms.Models.Infrastructure
             };
         }
 
-        static IEnumerable<CatalogItem> GetCatalogItemsFromFile(CatalogDBContext context)
+        private IEnumerable<CatalogItem> GetCatalogItemsFromFile(CatalogDBContext context)
         {
-            var contentRootPath = HostingEnvironment.ApplicationPhysicalPath;
-            string csvFileCatalogItems = Path.Combine(contentRootPath, "Setup", "CatalogItems.csv");
+            string csvFileCatalogItems = "Setup/CatalogItems.csv";
 
-            if (!File.Exists(csvFileCatalogItems))
+            if (_s3Client == null || !ObjectExistsAsync(_bucketName, _keyPrefix + csvFileCatalogItems).Result)
             {
                 return PreconfiguredData.GetPreconfiguredCatalogItems();
             }
@@ -181,7 +190,7 @@ namespace eShopLegacyWebForms.Models.Infrastructure
             var catalogTypeIdLookup = context.CatalogTypes.ToDictionary(ct => ct.Type, ct => ct.Id);
             var catalogBrandIdLookup = context.CatalogBrands.ToDictionary(ct => ct.Brand, ct => ct.Id);
 
-            return File.ReadAllLines(csvFileCatalogItems)
+            return ReadAllLinesFromS3(_bucketName, _keyPrefix + csvFileCatalogItems)
                         .Skip(1) // skip header row
                         .Select(row => Regex.Split(row, ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)"))
                         .Select(column => CreateCatalogItem(column, csvheaders, catalogTypeIdLookup, catalogBrandIdLookup))
@@ -294,9 +303,17 @@ namespace eShopLegacyWebForms.Models.Infrastructure
             return catalogItem;
         }
 
-        static string[] GetHeaders(string csvfile, string[] requiredHeaders, string[] optionalHeaders = null)
+        private string[] GetHeaders(string csvfile, string[] requiredHeaders, string[] optionalHeaders = null)
         {
-            string[] csvheaders = File.ReadLines(csvfile).First().ToLowerInvariant().Split(',');
+            string[] csvheaders;
+            if (_s3Client != null && ObjectExistsAsync(_bucketName, _keyPrefix + csvfile))
+            {
+                csvheaders = ReadAllLinesFromS3(_bucketName, _keyPrefix + csvfile).First().ToLowerInvariant().Split(',');
+            }
+            else
+            {
+                csvheaders = File.ReadLines(csvfile).First().ToLowerInvariant().Split(',');
+            }
 
             if (csvheaders.Count() < requiredHeaders.Count())
             {
@@ -331,8 +348,17 @@ namespace eShopLegacyWebForms.Models.Infrastructure
 
         private void ExecuteScript(CatalogDBContext context, string scriptFile)
         {
-            var scriptFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, scriptFile);
-            context.Database.ExecuteSqlCommand(File.ReadAllText(scriptFilePath));
+            string scriptContent;
+            if (_s3Client != null && ObjectExistsAsync(_bucketName, _keyPrefix + scriptFile).Result)
+            {
+                scriptContent = ReadAllTextFromS3(_bucketName, _keyPrefix + scriptFile);
+            }
+            else
+            {
+                var scriptFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, scriptFile);
+                scriptContent = File.ReadAllText(scriptFilePath);
+            }
+            context.Database.ExecuteSqlCommand(scriptContent);
         }
 
         private void AddCatalogItemPictures()
@@ -350,6 +376,42 @@ namespace eShopLegacyWebForms.Models.Infrastructure
 
             string zipFileCatalogItemPictures = Path.Combine(contentRootPath, "Setup", "CatalogItems.zip");
             ZipFile.ExtractToDirectory(zipFileCatalogItemPictures, picturePath.ToString());
+        }
+
+        private bool ObjectExistsAsync(string bucket, string key)
+        {
+            if (_s3Client == null) return false;
+            try
+            {
+                _s3Client.GetObjectMetadataAsync(bucket, key).Wait();
+                return true;
+            }
+            catch (AmazonS3Exception ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return false;
+            }
+        }
+
+        private string[] ReadAllLinesFromS3(string bucket, string key)
+        {
+            if (_s3Client == null) return new string[0];
+            var response = _s3Client.GetObjectAsync(bucket, key).Result;
+            using var reader = new StreamReader(response.ResponseStream);
+            var lines = new List<string>();
+            string line;
+            while ((line = reader.ReadLine()) != null)
+            {
+                lines.Add(line);
+            }
+            return lines.ToArray();
+        }
+
+        private string ReadAllTextFromS3(string bucket, string key)
+        {
+            if (_s3Client == null) return string.Empty;
+            var response = _s3Client.GetObjectAsync(bucket, key).Result;
+            using var reader = new StreamReader(response.ResponseStream);
+            return reader.ReadToEnd();
         }
     }
 }

@@ -48,6 +48,21 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AWSSDK.Core, Version=3.7.0.0, Culture=neutral, PublicKeyToken=1521e624b9b6d62b, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\AWSSDK.Core.3.7.400.0\lib\net45\AWSSDK.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="AWSSDK.S3, Version=3.7.0.0, Culture=neutral, PublicKeyToken=1521e624b9b6d62b, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\AWSSDK.S3.3.7.400.0\lib\net45\AWSSDK.S3.dll</HintPath>
+    </Reference>
+    <Reference Include="AWSSDK.S3, Version=3.7.0.0, Culture=neutral, PublicKeyToken=1521e624b9b6d62b, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\AWSSDK.S3.3.7.400.0\lib\net45\AWSSDK.S3.dll</HintPath>
+    </Reference>
+    <Reference Include="AWSSDK.CloudWatchLogs, Version=3.7.0.0, Culture=neutral, PublicKeyToken=1521e624b9b6d62b, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\AWSSDK.CloudWatchLogs.3.7.400.0\lib\net45\AWSSDK.CloudWatchLogs.dll</HintPath>
+    </Reference>
+    <Reference Include="AWS.Logger.Log4net, Version=4.1.0.0, Culture=neutral, PublicKeyToken=6804b8d3da3d3b30, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\AWS.Logger.Log4net.4.1.0\lib\net45\AWS.Logger.Log4net.dll</HintPath>
+    </Reference>
     <Reference Include="Antlr3.Runtime, Version=3.5.0.2, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>

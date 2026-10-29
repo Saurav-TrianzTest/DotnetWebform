@@ -1,17 +1,28 @@
 ﻿<log4net>
   <root>
     <level value="ALL" />
-    <appender-ref ref="file" />
+    <appender-ref ref="CloudWatchLogs" />
   </root>
-  <appender name="file" type="log4net.Appender.RollingFileAppender">
-    <file value="logFiles\myapp.log" />
-    <appendToFile value="true" />
-    <rollingStyle value="Size" />
-    <maxSizeRollBackups value="5" />
-    <maximumFileSize value="10MB" />
-    <staticLogFileName value="true" />
+  <appender name="CloudWatchLogs" type="AWS.Logger.Log4net.AWSAppender, AWS.Logger.Log4net">
+    <LogGroup>/eshop-legacy-webforms/application</LogGroup>
+    <LogStreamNamePrefix>{hostname}/</LogStreamNamePrefix>
+    <LogStreamNameSuffix>{date:yyyy-MM-dd}</LogStreamNameSuffix>
+    <Region>us-east-1</Region>
+    <BatchPushInterval>3000</BatchPushInterval>
+    <BatchSizeInBytes>102400</BatchSizeInBytes>
+    <MaxQueuedMessages>10000</MaxQueuedMessages>
     <layout type="log4net.Layout.PatternLayout">
       <conversionPattern value="%date [%thread] %property{activity} %level %logger - %property{requestinfo}%newline%message%newline%newline" />
     </layout>
   </appender>
+  <!-- Suppress AWS SDK wire and request logging to prevent secret leakage -->
+  <logger name="Amazon">
+    <level value="WARN" />
+  </logger>
+  <logger name="AWSSDK">
+    <level value="WARN" />
+  </logger>
+  <logger name="System.Net.Http.HttpClient">
+    <level value="WARN" />
+  </logger>
 </log4net>

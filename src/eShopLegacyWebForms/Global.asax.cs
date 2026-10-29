@@ -4,6 +4,7 @@ using eShopLegacyWebForms.Models;
 using eShopLegacyWebForms.Models.Infrastructure;
 using eShopLegacyWebForms.Modules;
 using log4net;
+using log4net.Config;
 using System;
 using System.Configuration;
 using System.Data.Entity;
@@ -11,6 +12,8 @@ using System.Diagnostics;
 using System.Web;
 using System.Web.Optimization;
 using System.Web.Routing;
+
+[assembly: log4net.Config.XmlConfigurator(ConfigFile: "log4Net.xml", Watch = true)]
 
 namespace eShopLegacyWebForms
 {
@@ -29,6 +32,7 @@ namespace eShopLegacyWebForms
         protected void Application_Start(object sender, EventArgs e)
         {
             // Code that runs on application startup
+            log4net.Config.XmlConfigurator.Configure(new System.IO.FileInfo("log4Net.xml"));
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
             ConfigureContainer();
@@ -40,8 +44,8 @@ namespace eShopLegacyWebForms
         /// </summary>
         protected void Session_Start(Object sender, EventArgs e)
         {
-            HttpContext.Current.Session["MachineName"] = Environment.MachineName;
-            HttpContext.Current.Session["SessionStartTime"] = DateTime.Now;
+            HttpContext.Current.Session["MachineName"] = Environment.UserName;
+            HttpContext.Current.Session["SessionStartTime"] = DateTime.UtcNow;
         }
 
         /// <summary>
@@ -50,7 +54,7 @@ namespace eShopLegacyWebForms
         private void ConfigureContainer()
         {
             var builder = new ContainerBuilder();
-            var mockData = bool.Parse(ConfigurationManager.AppSettings["UseMockData"]);
+            var mockData = bool.Parse(Environment.GetEnvironmentVariable("UseMockData") ?? ConfigurationManager.AppSettings["UseMockData"] ?? "false");
             builder.RegisterModule(new ApplicationModule(mockData));
             container = builder.Build();
             _containerProvider = new ContainerProvider(container);
@@ -58,7 +62,7 @@ namespace eShopLegacyWebForms
 
         private void ConfigDataBase()
         {
-            var mockData = bool.Parse(ConfigurationManager.AppSettings["UseMockData"]);
+            var mockData = bool.Parse(Environment.GetEnvironmentVariable("UseMockData") ?? ConfigurationManager.AppSettings["UseMockData"] ?? "false");
 
             if (!mockData)
             {
