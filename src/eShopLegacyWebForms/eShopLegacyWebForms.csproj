@@ -48,6 +48,30 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AWSSDK.Core, Version=4.0.102.16, Culture=neutral, PublicKeyToken=15d384556ca6ad48, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\AWSSDK.Core.4.0.102.16\lib\net45\AWSSDK.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="AWSSDK.S3, Version=4.0.104.8, Culture=neutral, PublicKeyToken=15d384556ca6ad48, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\AWSSDK.S3.4.0.104.8\lib\net45\AWSSDK.S3.dll</HintPath>
+    </Reference>
+    <Reference Include="AWSSDK.SimpleSystemsManagement, Version=4.0.104.8, Culture=neutral, PublicKeyToken=15d384556ca6ad48, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\AWSSDK.SimpleSystemsManagement.4.0.104.8\lib\net45\AWSSDK.SimpleSystemsManagement.dll</HintPath>
+    </Reference>
+    <Reference Include="AWSSDK.Extensions.NETCore.Setup, Version=4.0.102.7, Culture=neutral, PublicKeyToken=15d384556ca6ad48, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\AWSSDK.Extensions.NETCore.Setup.4.0.102.7\lib\net45\AWSSDK.Extensions.NETCore.Setup.dll</HintPath>
+    </Reference>
+    <Reference Include="AWSSDK.CloudWatchLogs, Version=4.0.104.8, Culture=neutral, PublicKeyToken=15d384556ca6ad48, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\AWSSDK.CloudWatchLogs.4.0.104.8\lib\net45\AWSSDK.CloudWatchLogs.dll</HintPath>
+    </Reference>
+    <Reference Include="AWS.Logger.Log4net, Version=4.1.0, Culture=neutral, PublicKeyToken=15d384556ca6ad48, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\AWS.Logger.Log4net.4.1.0\lib\net45\AWS.Logger.Log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.RedisSessionStateProvider, Version=5.0.4, Culture=neutral, PublicKeyToken=3f14371d0e62d4d0, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Web.RedisSessionStateProvider.5.0.4\lib\net451\Microsoft.Web.RedisSessionStateProvider.dll</HintPath>
+    </Reference>
+    <Reference Include="StackExchange.Redis, Version=3.4.31, Culture=neutral, PublicKeyToken=cf224fe5ed51e39a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\StackExchange.Redis.3.4.31\lib\net451\StackExchange.Redis.dll</HintPath>
+    </Reference>
     <Reference Include="Antlr3.Runtime, Version=3.5.0.2, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>

@@ -2,6 +2,7 @@
 using eShopLegacyWebForms.Services;
 using log4net;
 using System;
+using System.Threading.Tasks;
 using System.Web.UI;
 
 namespace eShopLegacyWebForms.Catalog
@@ -10,23 +11,22 @@ namespace eShopLegacyWebForms.Catalog
     {
         private static readonly ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        protected CatalogItem productToDelete; 
+        protected CatalogItem productToDelete;
 
         public ICatalogService CatalogService { get; set; }
 
-        protected void Page_Load(object sender, EventArgs e)
+        protected async void Page_Load(object sender, EventArgs e)
         {
-
             var productId = Convert.ToInt32(Page.RouteData.Values["id"]);
             _log.Info($"Now loading... /Catalog/Delete.aspx?id={productId}");
-            productToDelete = CatalogService.FindCatalogItem(productId);
+            productToDelete = await CatalogService.FindCatalogItemAsync(productId);
 
             this.DataBind();
         }
 
-        protected void Delete_Click(object sender, EventArgs e)
+        protected async void Delete_Click(object sender, EventArgs e)
         {
-            CatalogService.RemoveCatalogItem(productToDelete);
+            await CatalogService.RemoveCatalogItemAsync(productToDelete);
 
             Response.Redirect("~");
         }

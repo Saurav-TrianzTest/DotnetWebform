@@ -14,7 +14,11 @@ namespace eShopLegacyWebForms
         /// </summary>
         protected void Page_Load(object sender, EventArgs e)
         {
-            SessionInfoLabel.Text = $"{HttpContext.Current.Session["MachineName"]}, {HttpContext.Current.Session["SessionStartTime"]}";
+            var session = HttpContext.Current?.Session;
+            if (session != null)
+            {
+                SessionInfoLabel.Text = $"{session["MachineName"]}, {session["SessionStartTime"]}";
+            }
         }
     }
 }

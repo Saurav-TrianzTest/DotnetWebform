@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using eShopLegacyWebForms.Models;
 using eShopLegacyWebForms.Models.Infrastructure;
 using eShopLegacyWebForms.ViewModel;
@@ -68,6 +69,44 @@ namespace eShopLegacyWebForms.Services
 
         public void Dispose()
         {
+        }
+
+        public Task<PaginatedItemsViewModel<CatalogItem>> GetCatalogItemsPaginatedAsync(int pageSize = 10, int pageIndex = 0)
+        {
+            return Task.FromResult(GetCatalogItemsPaginated(pageSize, pageIndex));
+        }
+
+        public Task<CatalogItem> FindCatalogItemAsync(int id)
+        {
+            return Task.FromResult(FindCatalogItem(id));
+        }
+
+        public Task<IEnumerable<CatalogBrand>> GetCatalogBrandsAsync()
+        {
+            return Task.FromResult(GetCatalogBrands());
+        }
+
+        public Task<IEnumerable<CatalogType>> GetCatalogTypesAsync()
+        {
+            return Task.FromResult(GetCatalogTypes());
+        }
+
+        public Task CreateCatalogItemAsync(CatalogItem catalogItem)
+        {
+            CreateCatalogItem(catalogItem);
+            return Task.CompletedTask;
+        }
+
+        public Task UpdateCatalogItemAsync(CatalogItem catalogItem)
+        {
+            UpdateCatalogItem(catalogItem);
+            return Task.CompletedTask;
+        }
+
+        public Task RemoveCatalogItemAsync(CatalogItem catalogItem)
+        {
+            RemoveCatalogItem(catalogItem);
+            return Task.CompletedTask;
         }
 
         private List<CatalogItem> ComposeCatalogItems(List<CatalogItem> items)

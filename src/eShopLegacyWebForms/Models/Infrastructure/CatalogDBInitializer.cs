@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Amazon.S3;
+using Amazon.S3.Model;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.Entity;
@@ -7,8 +9,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Web;
-using System.Web.Hosting;
+using System.Threading.Tasks;
 
 namespace eShopLegacyWebForms.Models.Infrastructure
 {
@@ -20,13 +21,23 @@ namespace eShopLegacyWebForms.Models.Infrastructure
         private const string CatalogBrandHiLoSequenceScript = @"Models\Infrastructure\dbo.catalog_brand_hilo.Sequence.sql";
         private const string CatalogTypeHiLoSequenceScript = @"Models\Infrastructure\dbo.catalog_type_hilo.Sequence.sql";
 
+        private readonly IAmazonS3 _s3Client;
+        private readonly string _s3BucketName;
+        private readonly string _s3KeyPrefix;
+
         private CatalogItemHiLoGenerator indexGenerator;
         private bool useCustomizationData;
 
         public CatalogDBInitializer(CatalogItemHiLoGenerator indexGenerator)
         {
             this.indexGenerator = indexGenerator;
-            useCustomizationData = bool.Parse(ConfigurationManager.AppSettings["UseCustomizationData"]);
+            useCustomizationData = bool.Parse(ConfigurationManager.AppSettings["UseCustomizationData"] ?? Environment.GetEnvironmentVariable("UseCustomizationData") ?? "false");
+            _s3BucketName = ConfigurationManager.AppSettings["AWS:S3:DataBucket"];
+            _s3KeyPrefix = ConfigurationManager.AppSettings["AWS:S3:KeyPrefix"] ?? "setup/";
+            if (!string.IsNullOrEmpty(_s3BucketName))
+            {
+                _s3Client = new AmazonS3Client();
+            }
         }
 
         protected override void Seed(CatalogDBContext context)
@@ -91,12 +102,33 @@ namespace eShopLegacyWebForms.Models.Infrastructure
             context.SaveChanges();
         }
 
+        private string ReadFileContent(string relativePath)
+        {
+            if (_s3Client != null && !string.IsNullOrEmpty(_s3BucketName))
+            {
+                try
+                {
+                    var s3Key = _s3KeyPrefix + relativePath.Replace('\\', '/');
+                    var response = _s3Client.GetObjectAsync(_s3BucketName, s3Key).Result;
+                    using (var reader = new StreamReader(response.ResponseStream))
+                    {
+                        return reader.ReadToEnd();
+                    }
+                }
+                catch (AmazonS3Exception ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    return null;
+                }
+            }
+
+            return null;
+        }
+
         private IEnumerable<CatalogType> GetCatalogTypesFromFile()
         {
-            var contentRootPath = HostingEnvironment.ApplicationPhysicalPath;
-            string csvFileCatalogTypes = Path.Combine(contentRootPath, "Setup", "CatalogTypes.csv");
+            string csvContent = ReadFileContent("Setup/CatalogTypes.csv");
 
-            if (!File.Exists(csvFileCatalogTypes))
+            if (string.IsNullOrEmpty(csvContent))
             {
                 return PreconfiguredData.GetPreconfiguredCatalogTypes();
             }
@@ -104,9 +136,9 @@ namespace eShopLegacyWebForms.Models.Infrastructure
             string[] csvheaders;
 
             string[] requiredHeaders = { "catalogtype" };
-            csvheaders = GetHeaders(csvFileCatalogTypes, requiredHeaders);
+            csvheaders = GetHeadersFromContent(csvContent, requiredHeaders);
 
-            return File.ReadAllLines(csvFileCatalogTypes)
+            return csvContent.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
                                         .Skip(1) // skip header row
                                         .Select(x => CreateCatalogType(x))
                                         .Where(x => x != null);
@@ -129,10 +161,9 @@ namespace eShopLegacyWebForms.Models.Infrastructure
 
         static IEnumerable<CatalogBrand> GetCatalogBrandsFromFile()
         {
-            var contentRootPath = HostingEnvironment.ApplicationPhysicalPath;
-            string csvFileCatalogBrands = Path.Combine(contentRootPath, "Setup", "CatalogBrands.csv");
+            string csvContent = ReadFileContent("Setup/CatalogBrands.csv");
 
-            if (!File.Exists(csvFileCatalogBrands))
+            if (string.IsNullOrEmpty(csvContent))
             {
                 return PreconfiguredData.GetPreconfiguredCatalogBrands();
             }
@@ -140,9 +171,9 @@ namespace eShopLegacyWebForms.Models.Infrastructure
             string[] csvheaders;
 
             string[] requiredHeaders = { "catalogbrand" };
-            csvheaders = GetHeaders(csvFileCatalogBrands, requiredHeaders);
+            csvheaders = GetHeadersFromContent(csvContent, requiredHeaders);
 
-            return File.ReadAllLines(csvFileCatalogBrands)
+            return csvContent.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
                                         .Skip(1) // skip header row
                                         .Select(x => CreateCatalogBrand(x))
                                         .Where(x => x != null);
@@ -165,10 +196,9 @@ namespace eShopLegacyWebForms.Models.Infrastructure
 
         static IEnumerable<CatalogItem> GetCatalogItemsFromFile(CatalogDBContext context)
         {
-            var contentRootPath = HostingEnvironment.ApplicationPhysicalPath;
-            string csvFileCatalogItems = Path.Combine(contentRootPath, "Setup", "CatalogItems.csv");
+            string csvContent = ReadFileContent("Setup/CatalogItems.csv");
 
-            if (!File.Exists(csvFileCatalogItems))
+            if (string.IsNullOrEmpty(csvContent))
             {
                 return PreconfiguredData.GetPreconfiguredCatalogItems();
             }
@@ -176,12 +206,12 @@ namespace eShopLegacyWebForms.Models.Infrastructure
             string[] csvheaders;
             string[] requiredHeaders = { "catalogtypename", "catalogbrandname", "description", "name", "price", "pictureFileName" };
             string[] optionalheaders = { "availablestock", "restockthreshold", "maxstockthreshold", "onreorder" };
-            csvheaders = GetHeaders(csvFileCatalogItems, requiredHeaders, optionalheaders);
+            csvheaders = GetHeadersFromContent(csvContent, requiredHeaders, optionalheaders);
 
             var catalogTypeIdLookup = context.CatalogTypes.ToDictionary(ct => ct.Type, ct => ct.Id);
             var catalogBrandIdLookup = context.CatalogBrands.ToDictionary(ct => ct.Brand, ct => ct.Id);
 
-            return File.ReadAllLines(csvFileCatalogItems)
+            return csvContent.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
                         .Skip(1) // skip header row
                         .Select(row => Regex.Split(row, ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)"))
                         .Select(column => CreateCatalogItem(column, csvheaders, catalogTypeIdLookup, catalogBrandIdLookup))
@@ -294,9 +324,9 @@ namespace eShopLegacyWebForms.Models.Infrastructure
             return catalogItem;
         }
 
-        static string[] GetHeaders(string csvfile, string[] requiredHeaders, string[] optionalHeaders = null)
+        static string[] GetHeadersFromContent(string csvContent, string[] requiredHeaders, string[] optionalHeaders = null)
         {
-            string[] csvheaders = File.ReadLines(csvfile).First().ToLowerInvariant().Split(',');
+            string[] csvheaders = csvContent.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).First().ToLowerInvariant().Split(',');
 
             if (csvheaders.Count() < requiredHeaders.Count())
             {
@@ -331,8 +361,8 @@ namespace eShopLegacyWebForms.Models.Infrastructure
 
         private void ExecuteScript(CatalogDBContext context, string scriptFile)
         {
-            var scriptFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, scriptFile);
-            context.Database.ExecuteSqlCommand(File.ReadAllText(scriptFilePath));
+            string scriptContent = ReadFileContent(scriptFile);
+            context.Database.ExecuteSqlCommand(scriptContent);
         }
 
         private void AddCatalogItemPictures()
@@ -341,15 +371,55 @@ namespace eShopLegacyWebForms.Models.Infrastructure
             {
                 return;
             }
-            var contentRootPath = HostingEnvironment.ApplicationPhysicalPath;
-            DirectoryInfo picturePath = new DirectoryInfo(Path.Combine(contentRootPath, "Pics"));
-            foreach (FileInfo file in picturePath.GetFiles())
-            {
-                file.Delete();
-            }
 
-            string zipFileCatalogItemPictures = Path.Combine(contentRootPath, "Setup", "CatalogItems.zip");
-            ZipFile.ExtractToDirectory(zipFileCatalogItemPictures, picturePath.ToString());
+            if (_s3Client != null && !string.IsNullOrEmpty(_s3BucketName))
+            {
+                var contentRootPath = AppDomain.CurrentDomain.BaseDirectory;
+                DirectoryInfo picturePath = new DirectoryInfo(Path.Combine(contentRootPath, "Pics"));
+                if (picturePath.Exists)
+                {
+                    foreach (FileInfo file in picturePath.GetFiles())
+                    {
+                        file.Delete();
+                    }
+                }
+
+                string zipFileCatalogItemPictures = "Setup/CatalogItems.zip";
+                var s3Key = _s3KeyPrefix + zipFileCatalogItemPictures.Replace('\\', '/');
+                try
+                {
+                    var response = _s3Client.GetObjectAsync(_s3BucketName, s3Key).Result;
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        response.ResponseStream.CopyTo(memoryStream);
+                        var zipBytes = memoryStream.ToArray();
+                        using (var zipArchive = new ZipArchive(new MemoryStream(zipBytes), ZipArchiveMode.Read, false))
+                        {
+                            foreach (var entry in zipArchive.Entries)
+                            {
+                                var entryPath = Path.Combine(picturePath.ToString(), entry.FullName);
+                                entry.ExtractToFile(entryPath, true);
+                            }
+                        }
+                    }
+                }
+                catch (AmazonS3Exception ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    // Picture zip not found in S3, skip
+                }
+            }
+            else
+            {
+                var contentRootPath = AppDomain.CurrentDomain.BaseDirectory;
+                DirectoryInfo picturePath = new DirectoryInfo(Path.Combine(contentRootPath, "Pics"));
+                foreach (FileInfo file in picturePath.GetFiles())
+                {
+                    file.Delete();
+                }
+
+                string zipFileCatalogItemPictures = Path.Combine(contentRootPath, "Setup", "CatalogItems.zip");
+                ZipFile.ExtractToDirectory(zipFileCatalogItemPictures, picturePath.ToString());
+            }
         }
     }
 }

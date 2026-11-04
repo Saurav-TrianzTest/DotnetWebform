@@ -3,6 +3,7 @@ using eShopLegacyWebForms.Services;
 using eShopLegacyWebForms.ViewModel;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web.UI;
 using log4net;
 
@@ -19,18 +20,18 @@ namespace eShopLegacyWebForms
 
         protected PaginatedItemsViewModel<CatalogItem> Model { get; set; }
 
-        protected void Page_Load(object sender, EventArgs e)
+        protected async void Page_Load(object sender, EventArgs e)
         {
             if (PaginationParamsAreSet())
             {
                 var size = Convert.ToInt32(Page.RouteData.Values["size"]);
                 var index = Convert.ToInt32(Page.RouteData.Values["index"]);
-                Model = CatalogService.GetCatalogItemsPaginated(size, index);
+                Model = await CatalogService.GetCatalogItemsPaginatedAsync(size, index);
                 _log.Info($"Now loading... /Default.aspx?size={size}&index={index}");
             }
             else
             {
-                Model = CatalogService.GetCatalogItemsPaginated(DefaultPageSize, DefaultPageIndex);
+                Model = await CatalogService.GetCatalogItemsPaginatedAsync(DefaultPageSize, DefaultPageIndex);
                 _log.Info($"Now loading... /Default.aspx?size={DefaultPageSize}&index={DefaultPageIndex}");
             }
 

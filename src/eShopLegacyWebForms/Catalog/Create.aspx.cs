@@ -3,6 +3,8 @@ using eShopLegacyWebForms.Services;
 using log4net;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Web.UI;
 
 namespace eShopLegacyWebForms.Catalog
 {
@@ -27,7 +29,7 @@ namespace eShopLegacyWebForms.Catalog
             return CatalogService.GetCatalogTypes();
         }
 
-        protected void Create_Click(object sender, EventArgs e)
+        protected async void Create_Click(object sender, EventArgs e)
         {
             if (this.ModelState.IsValid)
             {
@@ -43,7 +45,7 @@ namespace eShopLegacyWebForms.Catalog
                     MaxStockThreshold = int.Parse(Maxstock.Text)
                 };
 
-                CatalogService.CreateCatalogItem(catalogItem);
+                await CatalogService.CreateCatalogItemAsync(catalogItem);
 
                 Response.Redirect("~");
             }

@@ -3,6 +3,7 @@ using eShopLegacyWebForms.Services;
 using log4net;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Web.UI;
 
 namespace eShopLegacyWebForms.Catalog
@@ -15,14 +16,14 @@ namespace eShopLegacyWebForms.Catalog
 
         public ICatalogService CatalogService { get; set; }
 
-        protected void Page_Load(object sender, EventArgs e)
+        protected async void Page_Load(object sender, EventArgs e)
         {
             if (!Page.IsPostBack)
             {
 
                 var productId = Convert.ToInt32(Page.RouteData.Values["id"]);
                 _log.Info($"Now loading... /Catalog/Edit.aspx?id={productId}");
-                product = CatalogService.FindCatalogItem(productId);
+                product = await CatalogService.FindCatalogItemAsync(productId);
 
                 BrandDropDownList.DataSource = CatalogService.GetCatalogBrands();
                 BrandDropDownList.SelectedValue = product.CatalogBrandId.ToString();
@@ -44,7 +45,7 @@ namespace eShopLegacyWebForms.Catalog
             return CatalogService.GetCatalogTypes();
         }
 
-        protected void Save_Click(object sender, EventArgs e)
+        protected async void Save_Click(object sender, EventArgs e)
         {
             if (this.ModelState.IsValid)
             {
@@ -61,7 +62,7 @@ namespace eShopLegacyWebForms.Catalog
                     RestockThreshold = int.Parse(Restock.Text),
                     MaxStockThreshold = int.Parse(Maxstock.Text)
                 };
-                CatalogService.UpdateCatalogItem(catalogItem);
+                await CatalogService.UpdateCatalogItemAsync(catalogItem);
 
                 Response.Redirect("~");
             }

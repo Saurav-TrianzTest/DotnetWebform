@@ -1,9 +1,9 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\Claude\\eShopLegacyWebFormsSolution\\",
+  "WorkspaceRootPath": "%SOLUTION_ROOT%\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{4416714A-9BB8-480B-95B3-C2599598E3EC}|src\\eShopLegacyWebForms\\eShopLegacyWebForms.csproj|d:\\claude\\eshoplegacywebformssolution\\src\\eshoplegacywebforms\\web.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "AbsoluteMoniker": "D:0:0:{4416714A-9BB8-480B-95B3-C2599598E3EC}|src\\eShopLegacyWebForms\\eShopLegacyWebForms.csproj|%SOLUTION_ROOT%\\src\\eshoplegacywebforms\\web.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
       "RelativeMoniker": "D:0:0:{4416714A-9BB8-480B-95B3-C2599598E3EC}|src\\eShopLegacyWebForms\\eShopLegacyWebForms.csproj|solutionrelative:src\\eshoplegacywebforms\\web.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     }
   ],
@@ -24,9 +24,9 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "Web.config",
-              "DocumentMoniker": "D:\\Claude\\eShopLegacyWebFormsSolution\\src\\eShopLegacyWebForms\\Web.config",
+              "DocumentMoniker": "%SOLUTION_ROOT%\\src\\eShopLegacyWebForms\\Web.config",
               "RelativeDocumentMoniker": "src\\eShopLegacyWebForms\\Web.config",
-              "ToolTip": "D:\\Claude\\eShopLegacyWebFormsSolution\\src\\eShopLegacyWebForms\\Web.config",
+              "ToolTip": "%SOLUTION_ROOT%\\src\\eShopLegacyWebForms\\Web.config",
               "RelativeToolTip": "src\\eShopLegacyWebForms\\Web.config",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAACVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000601|",
