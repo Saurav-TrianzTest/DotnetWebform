@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using System;
 using eShopLegacyWebForms.Models;
 using System.Collections.Generic;
-using System.Data.Entity;
-using System.Data.SqlClient;
 using System.Linq;
 using eShopLegacyWebForms.ViewModel;
 
@@ -58,7 +58,7 @@ namespace eShopLegacyWebForms.Services
 
         public void UpdateCatalogItem(CatalogItem catalogItem)
         {
-            db.Entry(catalogItem).State = EntityState.Modified;
+            db.Entry(catalogItem).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
             db.SaveChanges();
         }
 

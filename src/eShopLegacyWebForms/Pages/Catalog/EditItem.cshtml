@@ -1,0 +1,87 @@
+@page "{id}"
+@model eShopLegacyWebForms.Pages.Catalog.EditItemModel
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h2 class="esh-body-title">Edit</h2>
+
+<div class="container">
+    <div class="row">
+        <img class="col-md-6 esh-picture" src='~/Pics/@Model.product.PictureFileName' />
+        <div class="col-md-6 form-horizontal">
+            <form method="post">
+                <div class="form-group">
+                    <label class="control-label col-md-4">Name</label>
+                    <div class="col-md-8">
+                        <input name="Name" class="form-control" value="@Model.product.Name" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-4">Description</label>
+                    <div class="col-md-8">
+                        <input name="Description" class="form-control" value="@Model.product.Description" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-4">Brand</label>
+                    <div class="col-md-8">
+                        <select name="BrandDropDownList" class="form-control">
+                            @foreach (var brand in Model.GetBrands())
+                            {
+                                <option value="@brand.Id" selected="@(brand.Id == Model.product.CatalogBrandId)">@brand.Brand</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-4">Type</label>
+                    <div class="col-md-8">
+                        <select name="TypeDropDownList" class="form-control">
+                            @foreach (var type in Model.GetTypes())
+                            {
+                                <option value="@type.Id" selected="@(type.Id == Model.product.CatalogTypeId)">@type.Type</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-4">Price</label>
+                    <div class="col-md-8">
+                        <input name="Price" class="form-control" value="@Model.product.Price" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-4">Picture name</label>
+                    <div class="col-md-8">
+                        <input name="PictureFileName" readonly="readonly" class="form-control" value="@Model.product.PictureFileName" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-4">Stock</label>
+                    <div class="col-md-8">
+                        <input name="Stock" class="form-control" value="@Model.product.AvailableStock" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-4">Restock</label>
+                    <div class="col-md-8">
+                        <input name="Restock" class="form-control" value="@Model.product.RestockThreshold" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-4">Max stock</label>
+                    <div class="col-md-8">
+                        <input name="Maxstock" class="form-control" value="@Model.product.MaxStockThreshold" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-12 text-right esh-button-actions">
+                        <a asp-page="/Index" class="btn esh-button esh-button-secondary">[ Cancel ]</a>
+                        <button type="submit" class="btn esh-button esh-button-primary">[ Save ]</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

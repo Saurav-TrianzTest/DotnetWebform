@@ -28,12 +28,6 @@ namespace eShopLegacyWebForms.Modules
                     .InstancePerLifetimeScope();
             }
 
-            builder.RegisterType<CatalogDBContext>()
-                .InstancePerLifetimeScope();
-
-            builder.RegisterType<CatalogDBInitializer>()
-                .InstancePerLifetimeScope();
-
             builder.RegisterType<CatalogItemHiLoGenerator>()
                 .SingleInstance();
         }

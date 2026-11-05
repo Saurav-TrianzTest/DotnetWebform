@@ -1,0 +1,84 @@
+@page
+@model eShopLegacyWebForms.Pages.Catalog.CreateItemModel
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h2 class="esh-body-title">Create</h2>
+
+<div>
+    <div class="form-horizontal">
+        <form method="post">
+            <div class="form-group">
+                <label class="control-label col-md-2">Name</label>
+                <div class="col-md-3">
+                    <input name="Name" class="form-control" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-md-2">Description</label>
+                <div class="col-md-3">
+                    <input name="Description" class="form-control" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-md-2">Brand</label>
+                <div class="col-md-3">
+                    <select name="Brand" class="form-control">
+                        @foreach (var brand in Model.GetBrands())
+                        {
+                            <option value="@brand.Id">@brand.Brand</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-md-2">Type</label>
+                <div class="col-md-3">
+                    <select name="Type" class="form-control">
+                        @foreach (var type in Model.GetTypes())
+                        {
+                            <option value="@type.Id">@type.Type</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-md-2">Price</label>
+                <div class="col-md-3">
+                    <input name="Price" class="form-control" value="0.00" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-md-2">Picture name</label>
+                <div class="col-md-4 esh-form-information">
+                    Uploading images not allowed for this version.
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-md-2">Stock</label>
+                <div class="col-md-3">
+                    <input name="Stock" class="form-control" value="0" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-md-2">Restock</label>
+                <div class="col-md-3">
+                    <input name="Restock" class="form-control" value="0" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-md-2">Max stock</label>
+                <div class="col-md-3">
+                    <input name="Maxstock" class="form-control" value="0" />
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-3 text-right esh-button-actions">
+                    <a asp-page="/Index" class="btn esh-button esh-button-secondary">[ Cancel ]</a>
+                    <button type="submit" class="btn esh-button esh-button-primary">[ Create ]</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
